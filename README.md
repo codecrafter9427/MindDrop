@@ -73,7 +73,7 @@ graph TD
 ## Getting Started
 
 ```bash
-git clone https://github.com/<your-username>/minddrop.git
+git clone https://github.com/codecrafter9427/minddrop.git
 cd minddrop
 ```
 
