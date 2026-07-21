@@ -21,12 +21,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MindDropTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-
                     LoginScreen(
+                        modifier = Modifier.padding(innerPadding),
                         onLoginClick = { email, password ->
                             // Empty lambda since previews don't run real logic
                         }
@@ -50,7 +46,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     MindDropTheme {
-        Greeting("Android")
         LoginScreen(
             onLoginClick = { email, password ->
                 // Empty lambda since previews don't run real logic

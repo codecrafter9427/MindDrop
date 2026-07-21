@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoginScreen(
+fun LoginScreen(modifier: Modifier = Modifier,
     onLoginClick: (String, String) -> Unit
 ){
     var userName by remember { mutableStateOf("") }

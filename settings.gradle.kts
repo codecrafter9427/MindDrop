@@ -24,3 +24,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "MindDrop"
 include(":app")
+include(":domain")
+include(":data")
+include(":notifications")
+include(":ml")
