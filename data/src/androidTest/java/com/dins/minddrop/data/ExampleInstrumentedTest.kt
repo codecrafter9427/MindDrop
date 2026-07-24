@@ -1,4 +1,4 @@
-package com.dins.ml
+package com.dins.minddrop.data
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.dins.ml.test", appContext.packageName)
+        assertEquals("com.dins.minddrop.data.test", appContext.packageName)
     }
 }

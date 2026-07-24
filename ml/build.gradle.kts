@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dins.ml"
+    namespace = "com.dins.minddrop.ml"
     compileSdk {
         version = release(37)
     }
@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)

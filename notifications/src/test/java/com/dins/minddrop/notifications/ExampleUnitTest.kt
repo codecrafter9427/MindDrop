@@ -1,4 +1,4 @@
-package com.dins.notifications
+package com.dins.minddrop.notifications
 
 import org.junit.Test
 

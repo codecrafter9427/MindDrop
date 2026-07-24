@@ -1,4 +1,4 @@
-package com.dins.ml
+package com.dins.minddrop.ml
 
 import org.junit.Test
 
