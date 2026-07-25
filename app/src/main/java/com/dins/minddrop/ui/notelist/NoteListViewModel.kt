@@ -24,6 +24,10 @@ class NoteListViewModel @Inject constructor(
         observeNotes()
     }
 
+    fun retry() {
+        observeNotes()
+    }
+
     private fun observeNotes() {
         viewModelScope.launch(Dispatchers.IO) {
             getAllNotesUseCase()
