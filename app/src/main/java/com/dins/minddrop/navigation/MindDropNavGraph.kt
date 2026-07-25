@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.dins.minddrop.ui.addnote.AddNoteScreen
 import com.dins.minddrop.ui.notedetail.NoteDetailScreen
@@ -39,7 +40,9 @@ fun MindDropNavGraph(
                 onCancel = { navController.popBackStack() }
             )
         }
-        composable<NoteDestination.NoteDetail> { backStackEntry ->
+        composable<NoteDestination.NoteDetail>(
+            deepLinks = listOf(navDeepLink<NoteDestination.NoteDetail>(basePath = "minddrop://note"))
+        ) { backStackEntry ->
             val destination: NoteDestination.NoteDetail = backStackEntry.toRoute()
             NoteDetailScreen(
                 noteId = destination.noteId,

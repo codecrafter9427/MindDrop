@@ -1,5 +1,10 @@
 package com.dins.minddrop.ui.notelist
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +28,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +48,8 @@ fun NoteListScreen(
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    RequestNotificationPermission()
 
     Scaffold(
         modifier = modifier,
@@ -101,6 +111,26 @@ fun NoteListScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RequestNotificationPermission() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* Respect the user's choice either way -- surfacing still works without it. */ }
+
+    LaunchedEffect(Unit) {
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }
