@@ -1,5 +1,11 @@
 package com.dins.minddrop.ui.notelist
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +32,7 @@ fun NoteListFilters(
     searchQuery: String,
     selectedType: NoteType?,
     selectedPriority: Priority?,
+    filtersExpanded: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onTypeSelected: (NoteType) -> Unit,
     onPrioritySelected: (Priority) -> Unit,
@@ -53,30 +60,44 @@ fun NoteListFilters(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Expanding vertically rather than just fading keeps the list below from
+        // jumping -- it slides down as the chips take up their space.
+        AnimatedVisibility(
+            visible = filtersExpanded,
+            enter = expandVertically(animationSpec = tween(ANIMATION_MS)) +
+                fadeIn(animationSpec = tween(ANIMATION_MS)),
+            exit = shrinkVertically(animationSpec = tween(ANIMATION_MS)) +
+                fadeOut(animationSpec = tween(ANIMATION_MS))
         ) {
-            NoteType.entries.forEach { type ->
-                FilterChip(
-                    selected = selectedType == type,
-                    onClick = { onTypeSelected(type) },
-                    label = { Text(type.name) }
-                )
-            }
-        }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NoteType.entries.forEach { type ->
+                        FilterChip(
+                            selected = selectedType == type,
+                            onClick = { onTypeSelected(type) },
+                            label = { Text(type.name) }
+                        )
+                    }
+                }
 
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Priority.entries.forEach { priority ->
-                FilterChip(
-                    selected = selectedPriority == priority,
-                    onClick = { onPrioritySelected(priority) },
-                    label = { Text(priority.name) }
-                )
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Priority.entries.forEach { priority ->
+                        FilterChip(
+                            selected = selectedPriority == priority,
+                            onClick = { onPrioritySelected(priority) },
+                            label = { Text(priority.name) }
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+private const val ANIMATION_MS = 200

@@ -7,6 +7,7 @@ import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.model.Priority
 import com.dins.minddrop.domain.model.SortOrder
 import com.dins.minddrop.domain.model.UserPreferences
+import com.dins.minddrop.domain.usecase.DeleteNoteUseCase
 import com.dins.minddrop.domain.usecase.GetPaginatedNotesUseCase
 import com.dins.minddrop.domain.usecase.GetUserPreferencesUseCase
 import com.dins.minddrop.fake.FakeNoteRepository
@@ -14,6 +15,7 @@ import com.dins.minddrop.fake.FakeUserPreferencesRepository
 import com.dins.minddrop.fake.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -56,7 +58,9 @@ class NoteListViewModelTest {
         preferencesRepository: FakeUserPreferencesRepository
     ) = NoteListViewModel(
         GetPaginatedNotesUseCase(noteRepository),
-        GetUserPreferencesUseCase(preferencesRepository)
+        GetUserPreferencesUseCase(preferencesRepository),
+        DeleteNoteUseCase(noteRepository),
+        UnconfinedTestDispatcher()
     )
 
     // cachedIn(viewModelScope) keeps a sharing coroutine alive for the
@@ -196,6 +200,19 @@ class NoteListViewModelTest {
         viewModel.onTypeSelected(NoteType.TASK)
         assertEquals(null, viewModel.selectedType.value)
 
+        viewModel.viewModelScope.cancel()
+    }
+
+    @Test
+    fun `deleteNote removes the note from the repository`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(listOf(note("keep", createdAt = 1L), note("swiped", createdAt = 2L)))
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.deleteNote("swiped")
+
+        assertEquals(listOf("keep"), noteRepository.getAllNotes().first().map { it.id })
         viewModel.viewModelScope.cancel()
     }
 

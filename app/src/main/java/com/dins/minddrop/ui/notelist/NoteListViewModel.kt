@@ -4,13 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.dins.minddrop.data.di.IoDispatcher
 import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.NoteFilter
 import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.model.Priority
+import com.dins.minddrop.domain.usecase.DeleteNoteUseCase
 import com.dins.minddrop.domain.usecase.GetPaginatedNotesUseCase
 import com.dins.minddrop.domain.usecase.GetUserPreferencesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -20,12 +23,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteListViewModel @Inject constructor(
     getPaginatedNotesUseCase: GetPaginatedNotesUseCase,
-    getUserPreferencesUseCase: GetUserPreferencesUseCase
+    getUserPreferencesUseCase: GetUserPreferencesUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -70,6 +76,14 @@ class NoteListViewModel @Inject constructor(
         _searchQuery.value = ""
         _selectedType.value = null
         _selectedPriority.value = null
+    }
+
+    fun deleteNote(id: String) {
+        viewModelScope.launch(ioDispatcher) {
+            // Room's Flow drives the PagingSource invalidation, so the row
+            // disappears without the UI having to track the removal itself.
+            deleteNoteUseCase(id)
+        }
     }
 
     private companion object {

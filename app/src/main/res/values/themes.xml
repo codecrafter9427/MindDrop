@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MindDrop" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- windowBackground matches the Compose surface colour so the launch window
+         doesn't flash a default white before the first frame draws. -->
+    <style name="Theme.MindDrop" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/brand_background</item>
+    </style>
 </resources>
