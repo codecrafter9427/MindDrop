@@ -13,26 +13,39 @@ interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY createdAt DESC")
     fun getAllNotes(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes ORDER BY createdAt DESC")
-    fun getPagedNotesNewestFirst(): PagingSource<Int, NoteEntity>
-
-    @Query("SELECT * FROM notes ORDER BY createdAt ASC")
-    fun getPagedNotesOldestFirst(): PagingSource<Int, NoteEntity>
-
+    // Search, filters and sort all live in SQL so they compose with Paging 3 --
+    // filtering a PagingData client-side would mean loading the whole table.
+    // Sort is parameterized via CASE rather than split across three near-identical
+    // queries, so the WHERE clause exists in exactly one place. Each CASE yields
+    // NULL for the non-selected sort orders, contributing nothing to the ordering,
+    // so the trailing createdAt DESC both drives NEWEST_FIRST and acts as the
+    // tiebreak for PRIORITY_FIRST.
     @Query(
         """
         SELECT * FROM notes
+        WHERE (:query = '' OR content LIKE '%' || :query || '%')
+          AND (:type IS NULL OR type = :type)
+          AND (:priority IS NULL OR priority = :priority)
         ORDER BY
-            CASE priority
-                WHEN 'URGENT' THEN 4
-                WHEN 'HIGH' THEN 3
-                WHEN 'NORMAL' THEN 2
-                WHEN 'LOW' THEN 1
-                ELSE 0
-            END DESC
+            CASE WHEN :sortOrder = 'OLDEST_FIRST' THEN createdAt END ASC,
+            CASE WHEN :sortOrder = 'PRIORITY_FIRST' THEN
+                CASE priority
+                    WHEN 'URGENT' THEN 4
+                    WHEN 'HIGH' THEN 3
+                    WHEN 'NORMAL' THEN 2
+                    WHEN 'LOW' THEN 1
+                    ELSE 0
+                END
+            END DESC,
+            createdAt DESC
         """
     )
-    fun getPagedNotesByPriority(): PagingSource<Int, NoteEntity>
+    fun getPagedNotes(
+        query: String,
+        type: String?,
+        priority: String?,
+        sortOrder: String
+    ): PagingSource<Int, NoteEntity>
 
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getNoteById(id: String): NoteEntity?

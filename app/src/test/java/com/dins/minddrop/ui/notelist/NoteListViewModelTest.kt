@@ -36,10 +36,16 @@ class NoteListViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private fun note(id: String, createdAt: Long, priority: Priority = Priority.NORMAL) = Note(
+    private fun note(
+        id: String,
+        createdAt: Long,
+        priority: Priority = Priority.NORMAL,
+        content: String = "Note $id",
+        type: NoteType = NoteType.GENERAL
+    ) = Note(
         id = id,
-        content = "Note $id",
-        type = NoteType.GENERAL,
+        content = content,
+        type = type,
         priority = priority,
         createdAt = createdAt,
         lastViewedAt = createdAt
@@ -96,5 +102,117 @@ class NoteListViewModelTest {
         val viewModel = createViewModel(FakeNoteRepository(), FakeUserPreferencesRepository())
 
         assertEquals(emptyList<String>(), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `search query narrows the list to matching content`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(
+                listOf(
+                    note("groceries", createdAt = 1L, content = "Buy milk and eggs"),
+                    note("report", createdAt = 2L, content = "Finish the quarterly report")
+                )
+            )
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.onSearchQueryChange("milk")
+
+        assertEquals(listOf("groceries"), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `search is case insensitive`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(listOf(note("report", createdAt = 1L, content = "Finish the Quarterly Report")))
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.onSearchQueryChange("QUARTERLY")
+
+        assertEquals(listOf("report"), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `type filter narrows the list to that type`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(
+                listOf(
+                    note("task", createdAt = 1L, type = NoteType.TASK),
+                    note("idea", createdAt = 2L, type = NoteType.IDEA)
+                )
+            )
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.onTypeSelected(NoteType.IDEA)
+
+        assertEquals(listOf("idea"), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `priority filter narrows the list to that priority`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(
+                listOf(
+                    note("urgent", createdAt = 1L, priority = Priority.URGENT),
+                    note("low", createdAt = 2L, priority = Priority.LOW)
+                )
+            )
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.onPrioritySelected(Priority.URGENT)
+
+        assertEquals(listOf("urgent"), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `search and type filter apply together`() = runTest {
+        val noteRepository = FakeNoteRepository().apply {
+            setNotes(
+                listOf(
+                    note("a", createdAt = 1L, content = "Call the plumber", type = NoteType.TASK),
+                    note("b", createdAt = 2L, content = "Call the dentist", type = NoteType.REMINDER),
+                    note("c", createdAt = 3L, content = "Email the plumber", type = NoteType.TASK)
+                )
+            )
+        }
+        val viewModel = createViewModel(noteRepository, FakeUserPreferencesRepository())
+
+        viewModel.onSearchQueryChange("Call")
+        viewModel.onTypeSelected(NoteType.TASK)
+
+        assertEquals(listOf("a"), viewModel.snapshotIds())
+    }
+
+    @Test
+    fun `reselecting the active type chip clears the filter`() = runTest {
+        val viewModel = createViewModel(FakeNoteRepository(), FakeUserPreferencesRepository())
+
+        viewModel.onTypeSelected(NoteType.TASK)
+        assertEquals(NoteType.TASK, viewModel.selectedType.value)
+
+        viewModel.onTypeSelected(NoteType.TASK)
+        assertEquals(null, viewModel.selectedType.value)
+
+        viewModel.viewModelScope.cancel()
+    }
+
+    @Test
+    fun `clearFilters resets query type and priority`() = runTest {
+        val viewModel = createViewModel(FakeNoteRepository(), FakeUserPreferencesRepository())
+
+        viewModel.onSearchQueryChange("milk")
+        viewModel.onTypeSelected(NoteType.TASK)
+        viewModel.onPrioritySelected(Priority.HIGH)
+
+        viewModel.clearFilters()
+
+        assertEquals("", viewModel.searchQuery.value)
+        assertEquals(null, viewModel.selectedType.value)
+        assertEquals(null, viewModel.selectedPriority.value)
+
+        viewModel.viewModelScope.cancel()
     }
 }

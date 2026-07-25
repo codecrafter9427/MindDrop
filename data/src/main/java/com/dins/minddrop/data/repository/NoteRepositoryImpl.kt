@@ -8,6 +8,7 @@ import com.dins.minddrop.data.local.NoteDao
 import com.dins.minddrop.data.mapper.toDomain
 import com.dins.minddrop.data.mapper.toEntity
 import com.dins.minddrop.domain.model.Note
+import com.dins.minddrop.domain.model.NoteFilter
 import com.dins.minddrop.domain.model.SortOrder
 import com.dins.minddrop.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
@@ -21,13 +22,17 @@ class NoteRepositoryImpl @Inject constructor(
     override fun getAllNotes(): Flow<List<Note>> =
         noteDao.getAllNotes().map { entities -> entities.map { it.toDomain() } }
 
-    override fun getPaginatedNotes(sortOrder: SortOrder): Flow<PagingData<Note>> {
+    override fun getPaginatedNotes(
+        sortOrder: SortOrder,
+        filter: NoteFilter
+    ): Flow<PagingData<Note>> {
         val pagingSourceFactory = {
-            when (sortOrder) {
-                SortOrder.NEWEST_FIRST -> noteDao.getPagedNotesNewestFirst()
-                SortOrder.OLDEST_FIRST -> noteDao.getPagedNotesOldestFirst()
-                SortOrder.PRIORITY_FIRST -> noteDao.getPagedNotesByPriority()
-            }
+            noteDao.getPagedNotes(
+                query = filter.query.trim(),
+                type = filter.type?.name,
+                priority = filter.priority?.name,
+                sortOrder = sortOrder.name
+            )
         }
         return Pager(
             config = PagingConfig(pageSize = PAGE_SIZE, enablePlaceholders = false),

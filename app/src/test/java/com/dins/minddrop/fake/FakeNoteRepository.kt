@@ -4,6 +4,7 @@ import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import com.dins.minddrop.domain.model.Note
+import com.dins.minddrop.domain.model.NoteFilter
 import com.dins.minddrop.domain.model.SortOrder
 import com.dins.minddrop.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
@@ -21,12 +22,15 @@ class FakeNoteRepository : NoteRepository {
 
     override fun getAllNotes(): Flow<List<Note>> = notesFlow
 
-    override fun getPaginatedNotes(sortOrder: SortOrder): Flow<PagingData<Note>> =
+    override fun getPaginatedNotes(
+        sortOrder: SortOrder,
+        filter: NoteFilter
+    ): Flow<PagingData<Note>> =
         notesFlow.map { notes ->
             // Terminal load states are required: without them refresh stays
             // Loading forever and asSnapshot() in tests never returns.
             PagingData.from(
-                data = sortNotes(notes, sortOrder),
+                data = sortNotes(applyFilter(notes, filter), sortOrder),
                 sourceLoadStates = LoadStates(
                     refresh = LoadState.NotLoading(endOfPaginationReached = true),
                     prepend = LoadState.NotLoading(endOfPaginationReached = true),
@@ -57,6 +61,18 @@ class FakeNoteRepository : NoteRepository {
             if (it.id == id) it.copy(surfaceScore = score) else it
         }
     }
+
+    // Mirrors the WHERE clause in NoteDao.getPagedNotes: substring match on
+    // content (case-insensitive, as SQLite's LIKE is for ASCII) plus exact
+    // type/priority matches, with blank/null meaning "no restriction".
+    private fun applyFilter(notes: List<Note>, filter: NoteFilter): List<Note> =
+        notes.filter { note ->
+            val matchesQuery = filter.query.isBlank() ||
+                note.content.contains(filter.query.trim(), ignoreCase = true)
+            val matchesType = filter.type == null || note.type == filter.type
+            val matchesPriority = filter.priority == null || note.priority == filter.priority
+            matchesQuery && matchesType && matchesPriority
+        }
 
     private fun sortNotes(notes: List<Note>, sortOrder: SortOrder): List<Note> =
         when (sortOrder) {
