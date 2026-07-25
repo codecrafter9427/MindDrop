@@ -6,6 +6,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+composeCompiler {
+    stabilityConfigurationFiles.add(
+        rootProject.layout.projectDirectory.file("compose_compiler_config.conf")
+    )
+}
+
 android {
     namespace = "com.dins.minddrop"
     compileSdk = 37
@@ -22,7 +28,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Minification was off, which meant the ProGuard rules never ran and
+            // the release build shipped unshrunk -- both worth fixing before the
+            // Day 17 release AAB.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

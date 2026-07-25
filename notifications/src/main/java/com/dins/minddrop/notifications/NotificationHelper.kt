@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.dins.minddrop.domain.model.Note
@@ -44,14 +45,19 @@ class NotificationHelper @Inject constructor(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
-        if (!hasPermission) return
+        if (!hasPermission) {
+            Log.d(TAG, "Skipping notification for ${note.id}: POST_NOTIFICATIONS not granted")
+            return
+        }
 
         NotificationManagerCompat.from(context)
             .notify(note.id.hashCode(), notificationBuilder.build(note))
+        Log.d(TAG, "Posted notification for note ${note.id} (score=${note.surfaceScore})")
     }
 
     companion object {
         const val REMINDERS_CHANNEL_ID = "reminders"
         const val DAILY_SURFACE_CHANNEL_ID = "daily_surface"
+        private const val TAG = "NotificationHelper"
     }
 }

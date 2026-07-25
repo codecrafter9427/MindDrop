@@ -1,21 +1,60 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep line numbers so release crash reports stay readable, but hide the
+# original source file names.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ---------------------------------------------------------------------------
+# TensorFlow Lite
+# ---------------------------------------------------------------------------
+# TFLite reaches parts of its interpreter and delegates reflectively through
+# JNI, so R8 cannot see those references and would strip them. GPU delegate
+# classes are referenced optionally and absent from this build, hence dontwarn
+# rather than a keep.
+-keep class org.tensorflow.lite.** { *; }
+-keepclassmembers class org.tensorflow.lite.** { *; }
+-dontwarn org.tensorflow.lite.gpu.**
+-dontwarn org.tensorflow.lite.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ---------------------------------------------------------------------------
+# Hilt / Dagger
+# ---------------------------------------------------------------------------
+# Hilt and Dagger ship consumer rules covering their generated components;
+# these cover the reflective entry points those rules assume.
+-keep class dagger.hilt.** { *; }
+-keepclasseswithmembernames class * {
+    @dagger.* <fields>;
+}
+-keepclasseswithmembernames class * {
+    @dagger.* <methods>;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ---------------------------------------------------------------------------
+# Room
+# ---------------------------------------------------------------------------
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-dontwarn androidx.room.paging.**
+
+# ---------------------------------------------------------------------------
+# kotlinx.serialization (type-safe navigation routes)
+# ---------------------------------------------------------------------------
+# Navigation Compose serializes the @Serializable route classes, so their
+# generated serializers must survive minification.
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.**
+-keepclassmembers class com.dins.minddrop.navigation.** {
+    *** Companion;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keepclasseswithmembers class com.dins.minddrop.navigation.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# ---------------------------------------------------------------------------
+# Domain models
+# ---------------------------------------------------------------------------
+# Enum names are persisted to Room and DataStore as strings and read back with
+# valueOf, so obfuscating them would break stored data across an upgrade.
+-keepclassmembers enum com.dins.minddrop.domain.model.** {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

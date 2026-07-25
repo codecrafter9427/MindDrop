@@ -17,4 +17,7 @@ interface NoteRepository {
     suspend fun updateNote(note: Note)
     suspend fun deleteNote(id: String)
     suspend fun updateSurfaceScore(id: String, score: Float)
+
+    /** Applies every score in one transaction; see [updateSurfaceScore] for single updates. */
+    suspend fun updateSurfaceScores(scores: Map<String, Float>)
 }

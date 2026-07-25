@@ -1,5 +1,6 @@
 package com.dins.minddrop.data.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -43,8 +44,10 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun getNoteById(id: String): Note? =
         noteDao.getNoteById(id)?.toDomain()
 
-    override suspend fun addNote(note: Note) =
+    override suspend fun addNote(note: Note) {
         noteDao.insertNote(note.toEntity())
+        Log.d(TAG, "Saved note ${note.id} (type=${note.type}, priority=${note.priority})")
+    }
 
     override suspend fun updateNote(note: Note) =
         noteDao.updateNote(note.toEntity())
@@ -55,7 +58,13 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun updateSurfaceScore(id: String, score: Float) =
         noteDao.updateSurfaceScore(id, score)
 
+    override suspend fun updateSurfaceScores(scores: Map<String, Float>) {
+        noteDao.updateSurfaceScores(scores)
+        Log.d(TAG, "Updated surface scores for ${scores.size} notes")
+    }
+
     private companion object {
         const val PAGE_SIZE = 20
+        const val TAG = "NoteRepository"
     }
 }

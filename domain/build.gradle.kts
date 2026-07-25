@@ -13,8 +13,14 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.javax.inject)
-    implementation(libs.androidx.paging.common)
+    // api, not implementation: all three appear in :domain's public API --
+    // repositories return Flow and PagingData, and use cases / qualifiers are
+    // annotated with javax.inject. With implementation they aren't visible
+    // transitively, so a consumer can see IoDispatcher without being able to
+    // tell it's a @Qualifier. That worked only by accident while :data and :app
+    // happened to declare the same libraries themselves.
+    api(libs.kotlinx.coroutines.core)
+    api(libs.javax.inject)
+    api(libs.androidx.paging.common)
     testImplementation(libs.junit)
 }

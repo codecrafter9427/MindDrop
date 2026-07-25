@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.runtime.Composable
 import com.dins.minddrop.navigation.MindDropNavGraph
 import com.dins.minddrop.ui.theme.MindDropTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,17 +20,5 @@ class MainActivity : ComponentActivity() {
                 MindDropNavGraph(modifier = Modifier.fillMaxSize())
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    MindDropTheme {
-        LoginScreen(
-            onLoginClick = { email, password ->
-                // Empty lambda since previews don't run real logic
-            }
-        )
     }
 }

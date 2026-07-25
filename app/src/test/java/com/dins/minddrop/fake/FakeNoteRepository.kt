@@ -62,6 +62,14 @@ class FakeNoteRepository : NoteRepository {
         }
     }
 
+    override suspend fun updateSurfaceScores(scores: Map<String, Float>) {
+        // Single assignment, mirroring the real implementation's single
+        // transaction -- collectors see one emission, not one per note.
+        notesFlow.value = notesFlow.value.map { note ->
+            scores[note.id]?.let { note.copy(surfaceScore = it) } ?: note
+        }
+    }
+
     // Mirrors the WHERE clause in NoteDao.getPagedNotes: substring match on
     // content (case-insensitive, as SQLite's LIKE is for ASCII) plus exact
     // type/priority matches, with blank/null meaning "no restriction".

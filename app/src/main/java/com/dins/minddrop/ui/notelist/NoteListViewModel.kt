@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.dins.minddrop.data.di.IoDispatcher
+import com.dins.minddrop.domain.di.IoDispatcher
 import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.NoteFilter
 import com.dins.minddrop.domain.model.NoteType

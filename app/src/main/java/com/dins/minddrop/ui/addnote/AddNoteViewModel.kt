@@ -2,7 +2,7 @@ package com.dins.minddrop.ui.addnote
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dins.minddrop.data.di.IoDispatcher
+import com.dins.minddrop.domain.di.IoDispatcher
 import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.usecase.AddNoteUseCase

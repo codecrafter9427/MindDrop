@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
@@ -61,4 +62,12 @@ interface NoteDao {
 
     @Query("UPDATE notes SET surfaceScore = :score WHERE id = :id")
     suspend fun updateSurfaceScore(id: String, score: Float)
+
+    // The scoring worker rescores every note at once. Without @Transaction each
+    // row's UPDATE would commit separately -- N disk syncs and N invalidation
+    // notifications, so the paged list would rebuild repeatedly mid-pass.
+    @Transaction
+    suspend fun updateSurfaceScores(scores: Map<String, Float>) {
+        scores.forEach { (id, score) -> updateSurfaceScore(id, score) }
+    }
 }
