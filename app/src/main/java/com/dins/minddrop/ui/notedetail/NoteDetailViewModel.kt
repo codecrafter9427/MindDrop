@@ -24,6 +24,9 @@ class NoteDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<NoteDetailState>(NoteDetailState.Loading)
     val uiState: StateFlow<NoteDetailState> = _uiState.asStateFlow()
 
+    private val _isDeleted = MutableStateFlow(false)
+    val isDeleted: StateFlow<Boolean> = _isDeleted.asStateFlow()
+
     fun loadNote(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -43,6 +46,7 @@ class NoteDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 updateNoteUseCase(note)
+                _uiState.value = NoteDetailState.Success(note)
             } catch (e: Exception) {
                 _uiState.value = NoteDetailState.Error(e.message ?: "Unknown error")
             }
@@ -53,6 +57,7 @@ class NoteDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 deleteNoteUseCase(id)
+                _isDeleted.value = true
             } catch (e: Exception) {
                 _uiState.value = NoteDetailState.Error(e.message ?: "Unknown error")
             }

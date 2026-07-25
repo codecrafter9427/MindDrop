@@ -20,13 +20,22 @@ class AddNoteViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _isSaved = MutableStateFlow(false)
+    val isSaved: StateFlow<Boolean> = _isSaved.asStateFlow()
+
     fun addNote(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 addNoteUseCase(note)
+                _isSaved.value = true
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Failed to save note"
             }
         }
+    }
+
+    fun resetState() {
+        _isSaved.value = false
+        _errorMessage.value = null
     }
 }

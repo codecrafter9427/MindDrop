@@ -30,6 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun NoteListScreen(
     modifier: Modifier = Modifier,
     onAddNoteClick: () -> Unit = {},
+    onNoteClick: (String) -> Unit = {},
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -65,7 +66,7 @@ fun NoteListScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.notes, key = { it.id }) { note ->
-                                NoteCard(note = note)
+                                NoteCard(note = note, onClick = { onNoteClick(note.id) })
                             }
                         }
                     }
