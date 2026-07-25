@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,14 +30,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +50,7 @@ fun NoteListScreen(
     onSettingsClick: () -> Unit = {},
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val lazyPagingItems = viewModel.notes.collectAsLazyPagingItems()
 
     RequestNotificationPermission()
 
@@ -74,13 +77,26 @@ fun NoteListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (val state = uiState) {
-                is NoteListState.Loading -> {
+            when (val refreshState = lazyPagingItems.loadState.refresh) {
+                is LoadState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
-                is NoteListState.Success -> {
-                    if (state.notes.isEmpty()) {
+                is LoadState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = refreshState.error.message ?: "Something went wrong")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { lazyPagingItems.retry() }) {
+                            Text("Retry")
+                        }
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    if (lazyPagingItems.itemCount == 0) {
                         Text(
                             text = "No notes yet. Tap + to add one.",
                             modifier = Modifier.align(Alignment.Center)
@@ -91,22 +107,40 @@ fun NoteListScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(state.notes, key = { it.id }) { note ->
-                                NoteCard(note = note, onClick = { onNoteClick(note.id) })
+                            items(
+                                count = lazyPagingItems.itemCount,
+                                key = lazyPagingItems.itemKey { it.id }
+                            ) { index ->
+                                val note = lazyPagingItems[index]
+                                if (note != null) {
+                                    NoteCard(note = note, onClick = { onNoteClick(note.id) })
+                                }
                             }
-                        }
-                    }
-                }
 
-                is NoteListState.Error -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = state.message)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { viewModel.retry() }) {
-                            Text("Retry")
+                            if (lazyPagingItems.loadState.append is LoadState.Loading) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+
+                            if (lazyPagingItems.loadState.append is LoadState.Error) {
+                                item {
+                                    Text(
+                                        text = "Couldn't load more notes",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
