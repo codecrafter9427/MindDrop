@@ -3,7 +3,9 @@ package com.dins.minddrop.ui.addnote
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dins.minddrop.domain.model.Note
+import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.usecase.AddNoteUseCase
+import com.dins.minddrop.domain.usecase.CategorizeNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddNoteViewModel @Inject constructor(
-    private val addNoteUseCase: AddNoteUseCase
+    private val addNoteUseCase: AddNoteUseCase,
+    private val categorizeNoteUseCase: CategorizeNoteUseCase
 ) : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -26,7 +29,12 @@ class AddNoteViewModel @Inject constructor(
     fun addNote(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                addNoteUseCase(note)
+                val categorizedNote = if (note.type == NoteType.GENERAL) {
+                    note.copy(type = categorizeNoteUseCase(note.content))
+                } else {
+                    note
+                }
+                addNoteUseCase(categorizedNote)
                 _isSaved.value = true
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Failed to save note"
