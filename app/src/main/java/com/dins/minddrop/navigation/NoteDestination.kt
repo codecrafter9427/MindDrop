@@ -11,4 +11,7 @@ sealed interface NoteDestination {
 
     @Serializable
     data class NoteDetail(val noteId: String) : NoteDestination
+
+    @Serializable
+    data object Settings : NoteDestination
 }

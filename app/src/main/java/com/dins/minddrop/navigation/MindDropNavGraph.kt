@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import com.dins.minddrop.ui.addnote.AddNoteScreen
 import com.dins.minddrop.ui.notedetail.NoteDetailScreen
 import com.dins.minddrop.ui.notelist.NoteListScreen
+import com.dins.minddrop.ui.settings.SettingsScreen
 
 @Composable
 fun MindDropNavGraph(
@@ -25,8 +26,12 @@ fun MindDropNavGraph(
         composable<NoteDestination.NoteList> {
             NoteListScreen(
                 onAddNoteClick = { navController.navigate(NoteDestination.AddNote) },
-                onNoteClick = { noteId -> navController.navigate(NoteDestination.NoteDetail(noteId)) }
+                onNoteClick = { noteId -> navController.navigate(NoteDestination.NoteDetail(noteId)) },
+                onSettingsClick = { navController.navigate(NoteDestination.Settings) }
             )
+        }
+        composable<NoteDestination.Settings> {
+            SettingsScreen(onBackClick = { navController.popBackStack() })
         }
         composable<NoteDestination.AddNote> {
             AddNoteScreen(
