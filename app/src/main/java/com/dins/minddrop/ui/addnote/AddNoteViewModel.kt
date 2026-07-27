@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dins.minddrop.domain.di.IoDispatcher
 import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.NoteType
+import com.dins.minddrop.domain.reminder.ReminderScheduler
 import com.dins.minddrop.domain.usecase.AddNoteUseCase
 import com.dins.minddrop.domain.usecase.CategorizeNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class AddNoteViewModel @Inject constructor(
     private val addNoteUseCase: AddNoteUseCase,
     private val categorizeNoteUseCase: CategorizeNoteUseCase,
+    private val reminderScheduler: ReminderScheduler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -43,6 +45,9 @@ class AddNoteViewModel @Inject constructor(
             }
         }
     }
+
+    /** Checked on each call rather than cached: the user can revoke it in settings mid-session. */
+    fun canScheduleExactReminders(): Boolean = reminderScheduler.canScheduleExactReminders()
 
     fun resetState() {
         _isSaved.value = false

@@ -12,7 +12,9 @@ data class Note(
     val viewCount: Int = 0,
     val surfaceScore: Float = 0f,
     val isSurfaced: Boolean = false,
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    /** User-set reminder, or null if this note has none. */
+    val reminder: Reminder? = null
 )
 
 enum class NoteType { TASK, IDEA, REMINDER, REFERENCE, GENERAL }

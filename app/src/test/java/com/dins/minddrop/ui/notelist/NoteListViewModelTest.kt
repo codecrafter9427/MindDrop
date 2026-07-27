@@ -11,6 +11,7 @@ import com.dins.minddrop.domain.usecase.DeleteNoteUseCase
 import com.dins.minddrop.domain.usecase.GetPaginatedNotesUseCase
 import com.dins.minddrop.domain.usecase.GetUserPreferencesUseCase
 import com.dins.minddrop.fake.FakeNoteRepository
+import com.dins.minddrop.fake.FakeReminderScheduler
 import com.dins.minddrop.fake.FakeUserPreferencesRepository
 import com.dins.minddrop.fake.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,7 +60,7 @@ class NoteListViewModelTest {
     ) = NoteListViewModel(
         GetPaginatedNotesUseCase(noteRepository),
         GetUserPreferencesUseCase(preferencesRepository),
-        DeleteNoteUseCase(noteRepository),
+        DeleteNoteUseCase(noteRepository, FakeReminderScheduler()),
         UnconfinedTestDispatcher()
     )
 

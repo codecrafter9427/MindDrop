@@ -1,4 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Exact alarms so a reminder fires at the minute the user chose. Requesting
+         SCHEDULE_EXACT_ALARM rather than USE_EXACT_ALARM: the latter is granted at
+         install but Play restricts it to apps whose core purpose is alarms or
+         calendars, which a notes app is not. SCHEDULE_EXACT_ALARM is user-grantable,
+         and the scheduler degrades to an inexact window if it's revoked. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <!-- The platform drops pending alarms on reboot, so reminders must be re-armed. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+
+        <!-- Not exported: only this app's own AlarmManager PendingIntents target it. -->
+        <receiver
+            android:name=".reminder.ReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dins.minddrop.action.REMINDER" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Exported so it can receive the system BOOT_COMPLETED broadcast.
+             MY_PACKAGE_REPLACED is included because an app update also clears
+             pending alarms. -->
+        <receiver
+            android:name=".reminder.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
 </manifest>

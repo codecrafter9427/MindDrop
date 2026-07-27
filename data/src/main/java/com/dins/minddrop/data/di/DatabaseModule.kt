@@ -22,7 +22,9 @@ object DatabaseModule {
             context,
             MindDropDatabase::class.java,
             "minddrop.db"
-        ).build()
+        )
+            .addMigrations(*MindDropDatabase.ALL_MIGRATIONS)
+            .build()
 
     @Provides
     @Singleton

@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.Priority
+import com.dins.minddrop.domain.model.ReminderType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -30,6 +31,42 @@ class NoteNotificationBuilder @Inject constructor(
             .setPriority(notificationPriority(note.priority))
             .setContentIntent(deepLinkPendingIntent(note.id))
             .setAutoCancel(true)
+            .build()
+    }
+
+    /**
+     * Builds a user-set reminder notification. Alarm-type reminders go to the
+     * alarm channel (alarm audio stream) and are marked as alarm category so the
+     * system treats them accordingly under Do Not Disturb.
+     */
+    fun buildReminder(noteId: String, content: String, type: ReminderType): Notification {
+        val channelId = when (type) {
+            ReminderType.ALARM -> NotificationHelper.NOTE_ALARMS_CHANNEL_ID
+            ReminderType.NOTIFICATION -> NotificationHelper.NOTE_REMINDERS_CHANNEL_ID
+        }
+        val title = when (type) {
+            ReminderType.ALARM -> "Note alarm"
+            ReminderType.NOTIFICATION -> "Note reminder"
+        }
+
+        return NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(
+                if (type == ReminderType.ALARM) {
+                    NotificationCompat.CATEGORY_ALARM
+                } else {
+                    NotificationCompat.CATEGORY_REMINDER
+                }
+            )
+            // Alarms keep vibrating/ringing until acknowledged; a plain reminder
+            // shouldn't nag, so only the alarm variant is insistent.
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .setContentIntent(deepLinkPendingIntent(noteId))
             .build()
     }
 

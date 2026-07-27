@@ -14,5 +14,13 @@ data class NoteEntity(
     val viewCount: Int,
     val surfaceScore: Float,
     val isSurfaced: Boolean,
-    val tags: List<String>
+    val tags: List<String>,
+    // Stored as two nullable columns rather than an @Embedded Reminder, because
+    // a nullable @Embedded would need every field nullable anyway. The mapper
+    // recombines them into the domain's Reminder value object.
+    val reminderAtMillis: Long? = null,
+    val reminderType: String? = null,
+    // Non-null with a NONE default: unlike the two columns above, "doesn't repeat"
+    // is a real value rather than the absence of a reminder.
+    val reminderRecurrence: String = "NONE"
 )

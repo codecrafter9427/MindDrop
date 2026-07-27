@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dins.minddrop.domain.di.IoDispatcher
 import com.dins.minddrop.domain.model.Note
+import com.dins.minddrop.domain.reminder.ReminderScheduler
 import com.dins.minddrop.domain.usecase.DeleteNoteUseCase
 import com.dins.minddrop.domain.usecase.GetNoteByIdUseCase
 import com.dins.minddrop.domain.usecase.UpdateNoteUseCase
@@ -20,6 +21,7 @@ class NoteDetailViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val reminderScheduler: ReminderScheduler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -28,6 +30,9 @@ class NoteDetailViewModel @Inject constructor(
 
     private val _isDeleted = MutableStateFlow(false)
     val isDeleted: StateFlow<Boolean> = _isDeleted.asStateFlow()
+
+    /** Checked on each call rather than cached: the user can revoke it in settings mid-session. */
+    fun canScheduleExactReminders(): Boolean = reminderScheduler.canScheduleExactReminders()
 
     fun loadNote(id: String) {
         viewModelScope.launch(ioDispatcher) {

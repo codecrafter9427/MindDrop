@@ -8,6 +8,7 @@ import com.dins.minddrop.domain.usecase.DeleteNoteUseCase
 import com.dins.minddrop.domain.usecase.GetNoteByIdUseCase
 import com.dins.minddrop.domain.usecase.UpdateNoteUseCase
 import com.dins.minddrop.fake.FakeNoteRepository
+import com.dins.minddrop.fake.FakeReminderScheduler
 import com.dins.minddrop.fake.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,6 +22,7 @@ import org.junit.Test
 class NoteDetailViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val reminderScheduler = FakeReminderScheduler()
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(testDispatcher)
@@ -36,8 +38,9 @@ class NoteDetailViewModelTest {
 
     private fun createViewModel(repository: FakeNoteRepository) = NoteDetailViewModel(
         GetNoteByIdUseCase(repository),
-        UpdateNoteUseCase(repository),
-        DeleteNoteUseCase(repository),
+        UpdateNoteUseCase(repository, reminderScheduler),
+        DeleteNoteUseCase(repository, reminderScheduler),
+        reminderScheduler,
         testDispatcher
     )
 

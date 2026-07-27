@@ -6,6 +6,7 @@ import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.usecase.AddNoteUseCase
 import com.dins.minddrop.domain.usecase.CategorizeNoteUseCase
 import com.dins.minddrop.fake.FakeNoteRepository
+import com.dins.minddrop.fake.FakeReminderScheduler
 import com.dins.minddrop.fake.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -20,6 +21,7 @@ import org.junit.Test
 class AddNoteViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val reminderScheduler = FakeReminderScheduler()
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(testDispatcher)
@@ -28,10 +30,9 @@ class AddNoteViewModelTest {
         repository: FakeNoteRepository,
         categorizedAs: NoteType = NoteType.TASK
     ) = AddNoteViewModel(
-        AddNoteUseCase(repository),
-        CategorizeNoteUseCase(object : NoteCategorizer {
-            override fun categorize(content: String): NoteType = categorizedAs
-        }),
+        AddNoteUseCase(repository, reminderScheduler),
+        CategorizeNoteUseCase { categorizedAs },
+        reminderScheduler,
         testDispatcher
     )
 
