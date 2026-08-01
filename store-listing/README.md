@@ -11,10 +11,17 @@ Generated 2026-08-02. Copy for the listing lives in [descriptions.md](descriptio
 | `phone-1-note-list.png` | 1080×1920 (9:16), ≤8 MB | 254 KB ✔ |
 | `phone-2-reminder.png` | 1080×1920 (9:16), ≤8 MB | 223 KB ✔ |
 | `phone-3-search-filter.png` | 1080×1920 (9:16), ≤8 MB | 152 KB ✔ |
-| `phone-4-settings.png` | 1080×1920 (9:16), ≤8 MB | 143 KB ✔ |
-| 7″ / 10″ tablet screenshots | — | Not produced |
+| `phone-4-settings.png` | 1080×1920 (9:16), ≤8 MB | 148 KB ✔ |
+| `tablet7-1-note-list.png` | 1350×2400 (9:16), ≤8 MB | 110 KB ✔ |
+| `tablet7-2-reminder.png` | 1350×2400 (9:16), ≤8 MB | 98 KB ✔ |
+| `tablet7-3-settings.png` | 1350×2400 (9:16), ≤8 MB | 70 KB ✔ |
+| `tablet10-1-note-list.png` | 1620×2880 (9:16), ≤8 MB | 117 KB ✔ |
+| `tablet10-2-reminder.png` | 1620×2880 (9:16), ≤8 MB | 105 KB ✔ |
+| `tablet10-3-settings.png` | 1620×2880 (9:16), ≤8 MB | 76 KB ✔ |
 
-Play requires 2–8 phone screenshots; four are supplied.
+Play requires 2–8 screenshots per form factor; four phone and three of each
+tablet size are supplied. Tablet sides satisfy the stricter 10-inch rule too
+(each side between 1,080 px and 7,680 px).
 
 ## How these were made
 
@@ -25,17 +32,27 @@ Play requires 2–8 phone screenshots; four are supplied.
 - **Screenshots** — genuine `adb screencap` captures of the running app, not
   mockups. Demo notes were seeded directly into the app database so the listing
   shows realistic content rather than test data.
-- **Framing** — `frame_screenshots.py`. The device is 1080×2408 (≈9:20), taller
-  than the 9:16 Play asks for, so each capture is scaled to fit and padded with
-  the app's own background colour (`#121318`). Nothing is cropped; cropping to
-  9:16 would have cut off the FAB and the last note.
+- **Tablet screenshots** — no tablet hardware was available, so the phone was
+  temporarily driven at tablet geometry with `adb shell wm size` / `wm density`
+  (7″: 1200×1920 @ 320dpi → 600×960dp; 10″: 1600×2560 @ 320dpi → 800×1280dp),
+  captured, then reset to its original 1080×2408 @ 450dpi. These are the real
+  app laying itself out at tablet width — not upscaled phone screenshots.
+- **Framing** — `frame_screenshots.py`. Every target is an exact 9:16 multiple
+  sized to hold its capture, so tablet shots are padded at native resolution
+  rather than upscaled. Phone captures (1080×2408, ≈9:20) are scaled to fit.
+  Padding uses the app's own background colour (`#121318`); cropping to 9:16
+  would have cut off the FAB and the last note.
 
 Both scripts are re-runnable, so assets can be regenerated after UI changes.
 
 ## Known issues to address before publishing
 
-1. **Tablet screenshots not supplied.** Optional to publish, but Play may mark
-   the app as not optimised for large screens.
+1. **The app has no tablet-specific layout.** The tablet screenshots are honest
+   but show a single-column list stretched across a wide screen, with noticeable
+   empty space below the fold. Nothing is broken, and the chip rows do reflow
+   (all five type chips fit one row at 10″, unlike on phone), but a reviewer
+   will see a phone layout on a tablet. A two-pane list/detail layout at
+   sw600dp would be the real fix.
 2. **Privacy policy URL is mandatory** and does not exist yet. A one-page
    "all notes stay on your device, nothing is transmitted" served from GitHub
    Pages satisfies this.
