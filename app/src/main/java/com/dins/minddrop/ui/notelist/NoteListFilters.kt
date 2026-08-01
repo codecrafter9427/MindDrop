@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.model.Priority
+import com.dins.minddrop.ui.common.displayName
 
 @Composable
 fun NoteListFilters(
@@ -78,7 +79,7 @@ fun NoteListFilters(
                         FilterChip(
                             selected = selectedType == type,
                             onClick = { onTypeSelected(type) },
-                            label = { Text(type.name) }
+                            label = { Text(type.displayName) }
                         )
                     }
                 }
@@ -91,7 +92,7 @@ fun NoteListFilters(
                         FilterChip(
                             selected = selectedPriority == priority,
                             onClick = { onPrioritySelected(priority) },
-                            label = { Text(priority.name) }
+                            label = { Text(priority.displayName) }
                         )
                     }
                 }

@@ -38,6 +38,7 @@ import com.dins.minddrop.domain.model.Note
 import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.model.Priority
 import com.dins.minddrop.ui.theme.priorityColor
+import com.dins.minddrop.ui.common.displayName
 
 /**
  * [NoteCard] wrapped in a swipe-to-dismiss gesture. Only end-to-start (right to
@@ -148,7 +149,7 @@ private fun TypeChip(type: NoteType, modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Text(
-            text = type.name,
+            text = type.displayName,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

@@ -31,6 +31,7 @@ import com.dins.minddrop.domain.model.NoteType
 import com.dins.minddrop.domain.model.SortOrder
 import com.dins.minddrop.domain.model.SurfaceFrequency
 import com.dins.minddrop.domain.model.UserPreferences
+import com.dins.minddrop.ui.common.displayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +119,7 @@ private fun SettingsContent(
                     FilterChip(
                         selected = preferences.sortOrder == option,
                         onClick = { onSortOrderChange(option) },
-                        label = { Text(option.name) }
+                        label = { Text(option.displayName) }
                     )
                 }
             }
@@ -134,7 +135,7 @@ private fun SettingsContent(
                     FilterChip(
                         selected = preferences.defaultNoteType == option,
                         onClick = { onDefaultNoteTypeChange(option) },
-                        label = { Text(option.name) }
+                        label = { Text(option.displayName) }
                     )
                 }
             }
@@ -150,7 +151,7 @@ private fun SettingsContent(
                     FilterChip(
                         selected = preferences.surfaceFrequency == option,
                         onClick = { onSurfaceFrequencyChange(option) },
-                        label = { Text(option.name) }
+                        label = { Text(option.displayName) }
                     )
                 }
             }

@@ -50,6 +50,7 @@ import com.dins.minddrop.domain.model.ReminderType
 import com.dins.minddrop.ui.reminder.ReminderSection
 import com.dins.minddrop.ui.reminder.formatReminderLabel
 import com.dins.minddrop.ui.reminder.openExactAlarmSettings
+import com.dins.minddrop.ui.common.displayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,8 +158,8 @@ private fun NoteDetailContent(note: Note, modifier: Modifier = Modifier) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(text = note.type.name, style = MaterialTheme.typography.labelLarge)
-        Text(text = note.priority.name, style = MaterialTheme.typography.labelLarge)
+        Text(text = note.type.displayName, style = MaterialTheme.typography.labelLarge)
+        Text(text = note.priority.displayName, style = MaterialTheme.typography.labelLarge)
         Text(text = note.content, style = MaterialTheme.typography.bodyLarge)
 
         note.reminder?.let { reminder ->
@@ -226,7 +227,7 @@ private fun EditNoteContent(
                 FilterChip(
                     selected = type == option,
                     onClick = { type = option },
-                    label = { Text(option.name) }
+                    label = { Text(option.displayName) }
                 )
             }
         }
@@ -240,7 +241,7 @@ private fun EditNoteContent(
                 FilterChip(
                     selected = priority == option,
                     onClick = { priority = option },
-                    label = { Text(option.name) }
+                    label = { Text(option.displayName) }
                 )
             }
         }

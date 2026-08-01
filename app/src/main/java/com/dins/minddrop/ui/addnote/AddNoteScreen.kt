@@ -41,6 +41,7 @@ import com.dins.minddrop.domain.model.ReminderRecurrence
 import com.dins.minddrop.domain.model.ReminderType
 import com.dins.minddrop.ui.reminder.ReminderSection
 import com.dins.minddrop.ui.reminder.openExactAlarmSettings
+import com.dins.minddrop.ui.common.displayName
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +121,7 @@ fun AddNoteScreen(
                     FilterChip(
                         selected = type == option,
                         onClick = { type = option },
-                        label = { Text(option.name) }
+                        label = { Text(option.displayName) }
                     )
                 }
             }
@@ -134,7 +135,7 @@ fun AddNoteScreen(
                     FilterChip(
                         selected = priority == option,
                         onClick = { priority = option },
-                        label = { Text(option.name) }
+                        label = { Text(option.displayName) }
                     )
                 }
             }
